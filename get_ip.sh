@@ -1,28 +1,55 @@
 #!/bin/bash
 #Script Install OpenStack On Centos.
 if [ "$1" != "--help" ]; then
-
+ALL_IP=`/sbin/ifconfig |grep -B1 "inet addr" |awk '{ if ( $1 == "inet" ) { print $2 } else if ( $2 == "Link" ) { printf "%s:" ,$1 } }' |awk -F: '{ print $1 ": " $3 }' | sed '/^\lo/d'`
+#HOST_IP=`ifconfig $inter | grep inet | awk '{print $2}' | sed 's/addr://'`
+#EXT_HOST_IP=`ifconfig $exten | grep inet | awk '{print $2}' | sed 's/addr://'`
+DF_GATEWAY=`route -n | grep 'UG[ \t]' | awk '{print $2}'`
+#idf=`route -n | grep 'UG[ \t]' | awk '{print $8}'`
+#SUB_HOST=`route -n | grep $inter | grep 'U[ \t]' | awk '{print $3}'`
+#SUB_EXT=`route -n | grep $exten | grep 'U[ \t]' | awk '{print $3}'`
+#Genmask
+echo "Shell configure Network On Ubuntu"
+echo "Dia chi IP hien tai:"
+cat abc.txt
+echo
+echo "Default Gateway: $DF_GATEWAY"
+echo
+echo
 	inter="eth0"
 	#echo "Ten Cong Internal:"
 	read -p "Ten Cong Internal:" inter
 	if [ "$inter" = "" ]; then
 		inter="eth0"
 	fi
+	read -p "IP Address Internal:" HOST_IP
+	if [ "$HOST_IP" = "" ]; then
+		echo "IP Address Sai Cu Phap"
+	fi
+	read -p "Subnet Internal:" SUB_HOST
+	if [ "$SUB_HOST" = "" ]; then
+		echo "Subnet Mask Sai Cu Phap"
+	fi
+	echo ""
+	echo ""
 	exten="eth1"
 	#echo "Ten Cong External:"
 	read -p "Ten Cong External:" exten
 	if [ "$exten" = "" ]; then
 		exten="eth1"
 	fi
-HOST_IP=`ifconfig $inter | grep inet | awk '{print $2}' | sed 's/addr://'`
-EXT_HOST_IP=`ifconfig $exten | grep inet | awk '{print $2}' | sed 's/addr://'`
-DF_GATEWAY=`route -n | grep 'UG[ \t]' | awk '{print $2}'`
-idf=`route -n | grep 'UG[ \t]' | awk '{print $8}'`
-SUB_HOST=`route -n | grep $inter | grep 'U[ \t]' | awk '{print $3}'`
-SUB_EXT=`route -n | grep $exten | grep 'U[ \t]' | awk '{print $3}'`
-#Genmask
-echo "Internal interface $inter" IP ADDR:$HOST_IP " - Subnet Mask:" $SUB_HOST
-echo "External interface $exten" IP ADDR:$EXT_HOST_IP " - Subnet Mask:" $SUB_EXT " - Default Gateway:" $DF_GATEWAY
+	read -p "IP Address External:" EXT_HOST_IP
+	if [ "$EXT_HOST_IP" = "" ]; then
+		echo "IP Address Sai Cu Phap"
+	fi
+	read -p "Subnet Mask External:" SUB_EXT
+	if [ "$SUB_EXT" = "" ]; then
+		echo "Subnet Mask Sai Cu Phap"
+	fi
+	read -p "Default Gateway External:" DF_GATEWAY
+	if [ "$DF_GATEWAY" = "" ]; then
+		echo "Default Gateway Sai Cu Phap"
+	fi
 #echo "Default Gateway: Interface " $idf " Ip Address:" $DF_GATEWAY
 #echo "subnet: " $SUB_HOST
 #echo "SuB EXT: " $SUB_EXT
