@@ -38,7 +38,7 @@ iface $inter inet static
    netmask $SUB_HOST
 #
 auto $exten
-iface $exten inet manual
+iface $exten inet static
    address $EXT_HOST_IP
    netmask $SUB_EXT
    gateway $DF_GATEWAY
