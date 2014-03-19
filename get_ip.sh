@@ -81,6 +81,7 @@ clear
 echo "Change Configure Interface Success Full"
 echo "Internal interface $inter" IP ADDR:$HOST_IP " - Subnet Mask:" $SUB_HOST
 echo "External interface $exten" IP ADDR:$EXT_HOST_IP " - Subnet Mask:" $SUB_EXT " - Default Gateway:" $DF_GATEWAY
-echo "export HOST_IP=`ifconfig $inter | grep inet | awk '{print $2}' | sed 's/addr://'`" >> /root/config_openstack
-echo "export EXT_HOST_IP=`ifconfig $exten | grep inet | awk '{print $2}' | sed 's/addr://'`" >> /root/config_openstack
+echo "HOST_IP=`ifconfig eth1 | grep inet | awk '{print $2}' | sed 's/addr://'`" >> /root/config_openstack
+echo "EXT_HOST_IP=`ifconfig eth0 | grep inet | awk '{print $2}' | sed 's/addr://'`" >> /root/config_openstack
+chmod +x /root/config_openstack
 fi
