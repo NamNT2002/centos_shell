@@ -1,7 +1,7 @@
 #!/bin/bash
 #Script Install OpenStack On Centos.
 if [ "$1" != "--help" ]; then
-ALL_IP=`/sbin/ifconfig |grep -B1 "inet addr" |awk '{ if ( $1 == "inet" ) { print $2 } else if ( $2 == "Link" ) { printf "%s:" ,$1 } }' |awk -F: '{ print $1 ": " $3 }' | sed '/^\lo/d'`
+/sbin/ifconfig |grep -B1 "inet addr" |awk '{ if ( $1 == "inet" ) { print $2 } else if ( $2 == "Link" ) { printf "%s:" ,$1 } }' |awk -F: '{ print $1 ": " $3 }' | sed '/^\lo/d' >> allip.txt
 #HOST_IP=`ifconfig $inter | grep inet | awk '{print $2}' | sed 's/addr://'`
 #EXT_HOST_IP=`ifconfig $exten | grep inet | awk '{print $2}' | sed 's/addr://'`
 DF_GATEWAY=`route -n | grep 'UG[ \t]' | awk '{print $2}'`
@@ -10,12 +10,14 @@ DF_GATEWAY=`route -n | grep 'UG[ \t]' | awk '{print $2}'`
 #SUB_EXT=`route -n | grep $exten | grep 'U[ \t]' | awk '{print $3}'`
 #Genmask
 echo "Shell configure Network On Ubuntu"
+echo
 echo "Dia chi IP hien tai:"
-cat abc.txt
+cat allip.txt
 echo
 echo "Default Gateway: $DF_GATEWAY"
 echo
 echo
+rm -rf allip.txt
 	inter="eth0"
 	#echo "Ten Cong Internal:"
 	read -p "Ten Cong Internal:" inter
