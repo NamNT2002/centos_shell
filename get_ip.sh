@@ -22,5 +22,5 @@ echo "Internal IP ADDR:"$HOST_IP
 echo "External IP ADDR:"$EXT_HOST_IP
 echo "Default Gateway: Interface " $idf " Ip Address:" $DF_GATEWAY
 #echo "
-exit $?
+#exit $?
 fi
