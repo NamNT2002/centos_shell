@@ -18,9 +18,38 @@ HOST_IP=`ifconfig $inter | grep inet | awk '{print $2}' | sed 's/addr://'`
 EXT_HOST_IP=`ifconfig $exten | grep inet | awk '{print $2}' | sed 's/addr://'`
 DF_GATEWAY=`route -n | grep 'UG[ \t]' | awk '{print $2}'`
 idf=`route -n | grep 'UG[ \t]' | awk '{print $8}'`
-echo "Internal IP ADDR:"$HOST_IP
-echo "External IP ADDR:"$EXT_HOST_IP
-echo "Default Gateway: Interface " $idf " Ip Address:" $DF_GATEWAY
-#echo "
-#exit $?
+SUB_HOST=`route -n | grep $inter | grep 'U[ \t]' | awk '{print $3}'`
+SUB_EXT=`route -n | grep $exten | grep 'U[ \t]' | awk '{print $3}'`
+#Genmask
+echo "Internal interface $inter" IP ADDR:$HOST_IP " - Subnet Mask:" $SUB_HOST
+echo "External interface $exten" IP ADDR:$EXT_HOST_IP " - Subnet Mask:" $SUB_EXT " - Default Gateway:" $DF_GATEWAY
+#echo "Default Gateway: Interface " $idf " Ip Address:" $DF_GATEWAY
+#echo "subnet: " $SUB_HOST
+#echo "SuB EXT: " $SUB_EXT
+InterfaceFile=/etc/network/interfaces
+cat > $InterfaceFile <<EOF
+# Localhost
+auto lo
+iface lo inet loopback
+# Not Internet connected (OpenStack management network)
+auto $inter
+iface $inter inet static
+   address $HOST_IP
+   netmask $SUB_HOST
+#
+auto $exten
+iface $exten inet manual
+   address $EXT_HOST_IP
+   netmask $SUB_EXT
+   gateway $DF_GATEWAY
+   dns-nameservers 8.8.8.8
+EOF
+echo "Restart network"
+echo "Waiting ..... "
+sleep 3
+/etc/init.d/networking restart
+clear
+echo "Change Configure Interface Success Full"
+echo "Internal interface $inter" IP ADDR:$HOST_IP " - Subnet Mask:" $SUB_HOST
+echo "External interface $exten" IP ADDR:$EXT_HOST_IP " - Subnet Mask:" $SUB_EXT " - Default Gateway:" $DF_GATEWAY
 fi
