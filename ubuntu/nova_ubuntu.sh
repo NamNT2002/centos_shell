@@ -141,3 +141,4 @@ sleep 3
 nova-manage db sync
 echo "Restart Nova"
 cd /etc/init.d/; for i in $( ls nova-* ); do service $i restart; cd; done
+echo "Install Success Full"
