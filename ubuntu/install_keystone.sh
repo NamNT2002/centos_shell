@@ -1,12 +1,11 @@
 #!/bin/bash
 #Install Keystone
 . ./configure_openstack
-PASS_ADMIN=`openssl rand -hex 16`
-PASS_SERVICE=`openssl rand -hex 16`
-ADMIN_PASSWORD=${ADMIN_PASSWORD:-$PASS_ADMIN}
-SERVICE_PASSWORD=${SERVICE_PASSWORD:-$SERVICE_PASSWORD}
+
+ADMIN_PASSWORD=`openssl rand -hex 16`
+SERVICE_PASSWORD=`openssl rand -hex 16`
 export SERVICE_TOKEN="ADMIN"
-export SERVICE_ENDPOINT="http://${HOST_IP}:35357/v2.0"
+export SERVICE_ENDPOINT="http://$HOST_IP:35357/v2.0"
 SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
 echo "Import PPA OpenStack"
 sleep 3
@@ -20,7 +19,7 @@ apt-get -y update && apt-get -y dist-upgrade
 clear
 echo "Install Rabit messaging"
 sleep 2
-$RABBIT_PASS=`openssl rand -hex 16`
+RABBIT_PASS=`openssl rand -hex 16`
 echo RABBIT_PASS=$RABBIT_PASS >> configure_openstack
 echo ADMIN_PASSWORD=$ADMIN_PASSWORD >> configure_openstack
 echo SERVICE_PASSWORD=$SERVICE_PASSWORD >> configure_openstack
@@ -30,11 +29,19 @@ clear
 echo "Install Rabit Messaging Success"
 echo "Install Keystone"
 apt-get -y install keystone
-sed -i 's|connection = sqlite:////var/lib/keystone/keystone.db|connection = mysql://keystone:$dbp_keystone@$HOST_IP/keystone |g' /etc/keystone/keystone.conf
+#sed -i 's|connection = sqlite:////var/lib/keystone/keystone.db|connection = mysql://keystone:[$dbp_keystone]@[$HOST_IP]/keystone |g' /etc/keystone/keystone.conf
+sed '/^\connection = sqlite/d' /etc/keystone/keystone.conf >> keystoneconf
+mv /etc/keystone/keystone.conf /etc/keystone/keystone.conf.bk
+sed '/^\[sql]/d' keystoneconf >> keystoneconf1
+rm -rf keystoneconf
+sed '/^\#/d' keystoneconf1 >> /etc/keystone/keystone.conf
+rm -rf keystoneconf1
+echo "[sql]" >> /etc/keystone/keystone.conf
+echo "connection = mysql://keystone:$dbp_keystone@$HOST_IP/keystone" >> /etc/keystone/keystone.conf
 rm -rf rm /var/lib/keystone/keystone.db
 #sync db keystone
 echo "Restart Keystone"
-/etc/ini.d/keystone restart
+/etc/init.d/keystone restart
 keystone-manage db_sync
 
 get_id () {
@@ -102,4 +109,4 @@ keystone endpoint-create --region RegionOne --service-id $HEAT_SERVICE --publicu
 keystone endpoint-create --region RegionOne --service-id $CFN_SERVICE --publicurl 'http://'"$EXT_HOST_IP"':8000/v1' --adminurl 'http://'"$HOST_IP"':8000/v1' --internalurl 'http://'"$HOST_IP"':8000/v1'
 
 echo "Install Success Full"
-echo `keystone endpoint-list`
+#echo `keystone endpoint-list`
