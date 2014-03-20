@@ -6,6 +6,8 @@ ADMIN_PASSWORD=`openssl rand -hex 16`
 SERVICE_PASSWORD=`openssl rand -hex 16`
 export SERVICE_TOKEN="ADMIN"
 export SERVICE_ENDPOINT="http://$HOST_IP:35357/v2.0"
+echo "export SERVICE_TOKEN=ADMIN" >> source_openstack
+echo "export SERVICE_ENDPOINT=http://$HOST_IP:35357/v2.0" >> source_openstack
 SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
 echo "Import PPA OpenStack"
 sleep 3
@@ -23,6 +25,8 @@ RABBIT_PASS=`openssl rand -hex 16`
 echo RABBIT_PASS=$RABBIT_PASS >> configure_openstack
 echo ADMIN_PASSWORD=$ADMIN_PASSWORD >> configure_openstack
 echo SERVICE_PASSWORD=$SERVICE_PASSWORD >> configure_openstack
+echo SERVICE_TOKEN=$SERVICE_TOKEN >> configure_openstack
+echo SERVICE_ENDPOINT=$SERVICE_ENDPOINT >> configure_openstack
 apt-get -y install rabbitmq-server
 rabbitmqctl change_password guest $RABBIT_PASS
 clear
