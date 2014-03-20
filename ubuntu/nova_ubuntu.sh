@@ -48,7 +48,7 @@ auth_port = 35357
 auth_protocol = http
 admin_tenant_name = service
 admin_user = nova
-admin_password = $ADMIN_PASSWORD
+admin_password = $SERVICE_PASSWORD
 eof
 
 cat > /etc/nova/api-paste.ini << eof
@@ -130,7 +130,7 @@ auth_port = 35357
 auth_protocol = http
 admin_tenant_name = service
 admin_user = nova
-admin_password = $ADMIN_PASSWORD
+admin_password = $SERVICE_PASSWORD
 auth_version = v2.0
 eof
 echo "Restart nova"

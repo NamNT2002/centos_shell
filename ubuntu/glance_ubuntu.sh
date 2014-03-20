@@ -81,7 +81,7 @@ auth_port = 35357
 auth_protocol = http
 admin_tenant_name = service
 admin_user = glance
-admin_password = $ADMIN_PASSWORD
+admin_password = $SERVICE_PASSWORD
 [paste_deploy]
 flavor = keystone
 eof
@@ -103,7 +103,7 @@ auth_port = 35357
 auth_protocol = http
 admin_tenant_name = service
 admin_user = glance
-admin_password = $ADMIN_PASSWORD
+admin_password = $SERVICE_PASSWORD
 [paste_deploy]
 flavor = keystone
 eof
@@ -124,7 +124,7 @@ paste.filter_factory = glance.api.middleware.context:ContextMiddleware.factory
 paste.filter_factory = glance.api.middleware.context:UnauthenticatedContextMiddleware.factory
 [filter:authtoken]
 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
-admin_password = $ADMIN_PASSWORD
+admin_password = $SERVICE_PASSWORD
 admin_user = glance
 admin_tenant_name = service
 auth_protocol = http
@@ -173,7 +173,7 @@ paste.filter_factory = glance.api.middleware.context:ContextMiddleware.factory
 paste.filter_factory = glance.api.middleware.context:UnauthenticatedContextMiddleware.factory
 [filter:authtoken]
 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
-admin_password = $ADMIN_PASSWORD
+admin_password = $SERVICE_PASSWORD
 admin_user = glance
 admin_tenant_name = service
 auth_protocol = http
