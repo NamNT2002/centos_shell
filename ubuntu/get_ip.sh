@@ -85,7 +85,7 @@ echo "External interface $exten" IP ADDR:$EXT_HOST_IP " - Subnet Mask:" $SUB_EXT
 #echo "EXT_HOST_IP=`ifconfig eth0 | grep inet | awk '{print $2}' | sed 's/addr://'`" >> /root/config_openstack
 #chmod +x /root/config_openstack
 rm -rf configure_openstack
-echo "HOST_IP=`ifconfig $inter | grep inet | awk '{print $2}' | sed 's/addr://'`" >> configure_openstack
-echo "EXT_HOST_IP=`ifconfig $exten | grep inet | awk '{print $2}' | sed 's/addr://'`" >> configure_openstack
+echo "HOST_IP=$HOST_IP" >> configure_openstack
+echo "EXT_HOST_IP=$EXT_HOST_IP" >> configure_openstack
 chmod +x configure_openstack
 fi
