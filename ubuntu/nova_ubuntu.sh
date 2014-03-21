@@ -39,6 +39,21 @@ vncserver_proxyclient_address=$EXT_HOST_IP
 
 auth_strategy=keystone
 
+neutron_metadata_proxy_shared_secret = $METADATA_PASS
+service_neutron_metadata_proxy = true
+
+network_api_class=nova.network.neutronv2.api.API
+neutron_url=http://$HOST_IP:9696
+neutron_auth_strategy=keystone
+neutron_admin_tenant_name=service
+neutron_admin_username=neutron
+neutron_admin_password=$SERVICE_PASSWORD
+neutron_admin_auth_url=http://$HOST_IP:35357/v2.0
+linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+firewall_driver=nova.virt.firewall.NoopFirewallDriver
+security_group_api=neutron
+
+
 [database]
 # The SQLAlchemy connection string used to connect to the database
 connection = mysql://nova:$dbp_nova@$HOST_IP/nova

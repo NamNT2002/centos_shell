@@ -1,6 +1,7 @@
 #!/bin/bash
 #Script Install OpenStack On Centos.
 if [ "$1" != "--help" ]; then
+. ./configure_openstack
 /sbin/ifconfig |grep -B1 "inet addr" |awk '{ if ( $1 == "inet" ) { print $2 } else if ( $2 == "Link" ) { printf "%s:" ,$1 } }' |awk -F: '{ print $1 ": " $3 }' | sed '/^\lo/d' >> allip.txt
 #CM_HOST_IP=`ifconfig $inter | grep inet | awk '{print $2}' | sed 's/addr://'`
 #CM_EXT_CM_HOST_IP=`ifconfig $exten | grep inet | awk '{print $2}' | sed 's/addr://'`
@@ -17,6 +18,34 @@ echo
 echo "Default Gateway: $DF_GATEWAY"
 echo
 echo
+echo "Add app openstack and basic configure"
+apt-get -y update
+#install python mysql client
+apt-get install python-mysqldb -y
+
+#import ppa openstack
+apt-get install python-software-properties -y
+add-apt-repository cloud-archive:havana << eof
+
+
+
+eof
+
+apt-get update && apt-get dist-upgrade -y
+
+
+#configure Kernel
+sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+sed -i 's/#net.ipv4.conf.default.rp_filter=1/net.ipv4.conf.default.rp_filter=0/' /etc/sysctl.conf
+sed -i 's/#net.ipv4.conf.all.rp_filter=1/net.ipv4.conf.all.rp_filter=0/' /etc/sysctl.conf
+sysctl net.ipv4.ip_forward=1
+sysctl net.ipv4.conf.all.rp_filter=0
+sysctl net.ipv4.conf.default.rp_filter=0
+sysctl -p
+/etc/init.d/networking restart
+#install packet
+apt-get -y install neutron-server neutron-dhcp-agent neutron-plugin-openvswitch-agent neutron-l3-agent openvswitch-controller openvswitch-switch openvswitch-datapath-dkms
+
 rm -rf allip.txt
 	inter="eth0"
 	#echo "Ten Cong Internal:"
@@ -52,6 +81,10 @@ rm -rf allip.txt
 	if [ "$DF_GATEWAY" = "" ]; then
 		echo "Default Gateway Sai Cu Phap"
 	fi
+	ovs-vsctl add-br br-int
+ovs-vsctl add-br br-ex
+ovs-vsctl add-port br-ex $exten
+clear
 #echo "Default Gateway: Interface " $idf " Ip Address:" $DF_GATEWAY
 #echo "subnet: " $SUB_HOST
 #echo "SuB EXT: " $SUB_EXT
@@ -67,7 +100,13 @@ iface $inter inet static
    netmask $SUB_HOST
 #
 auto $exten
-iface $exten inet static
+iface $exten inet manual
+up ifconfig \$IFACE 0.0.0.0 up
+up ip link set \$IFACE promisc on
+down ip link set \$IFACE promisc off
+down ifconfig \$IFACE down
+auto br-ex
+iface br-ex inet static
    address $CM_EXT_CM_HOST_IP
    netmask $SUB_EXT
    gateway $DF_GATEWAY
@@ -88,20 +127,6 @@ echo "External interface $exten" IP ADDR:$CM_EXT_CM_HOST_IP " - Subnet Mask:" $S
 echo "CM_HOST_IP=$CM_HOST_IP" >> configure_openstack
 echo "CM_EXT_CM_HOST_IP=$CM_EXT_CM_HOST_IP" >> configure_openstack
 chmod +x configure_openstack
-
-echo "Add app openstack and basic configure"
-apt-get -y update
-#install python mysql client
-apt-get install python-mysqldb -y
-
-#import ppa openstack
-apt-get install python-software-properties -y
-add-apt-repository cloud-archive:havana << eof
-
-
-
-eof
-
-apt-get update && apt-get dist-upgrade -y
+/etc/init.d/networking restart
 
 fi

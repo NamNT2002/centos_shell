@@ -36,6 +36,17 @@ vncserver_proxyclient_address=$CM_HOST_IP
 novncproxy_base_url=http://$HOST_IP:6080/vnc_auto.html
 glance_host=$HOST_IP
 
+network_api_class=nova.network.neutronv2.api.API
+neutron_url=http://$HOST_IP:9696
+neutron_auth_strategy=keystone
+neutron_admin_tenant_name=service
+neutron_admin_username=neutron
+neutron_admin_password=$SERVICE_PASSWORD
+neutron_admin_auth_url=http://$HOST_IP:35357/v2.0
+linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+firewall_driver=nova.virt.firewall.NoopFirewallDriver
+security_group_api=neutron
+
 [database]
 # The SQLAlchemy connection string used to connect to t
 connection = mysql://nova:$dbp_nova@$HOST_IP/nova
