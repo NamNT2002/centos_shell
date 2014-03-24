@@ -139,8 +139,15 @@ apt-get update && apt-get dist-upgrade -y
 . ./configure_openstack
 apt-get -y install nova-compute-kvm python-guestfs
 dpkg-statoverride  --update --add root root 0644 /boot/vmlinuz-$(uname -r)
-wget https://raw.githubusercontent.com/NamNT2002/centos_shell/master/ubuntu/statoverride
-mv statoverride /etc/kernel/postinst.d/statoverride
+#wget https://raw.githubusercontent.com/NamNT2002/centos_shell/master/ubuntu/statoverride
+#mv statoverride /etc/kernel/postinst.d/statoverride
+cat > /etc/kernel/postinst.d/statoverride << eof
+#!/bin/sh
+version="\$1"
+# passing the kernel version is required
+[ -z "\${version}" ] && exit 0
+dpkg-statoverride --update --add root root 0644 /boot/vmlinuz-\${version}
+eof
 chmod +x /etc/kernel/postinst.d/statoverride
 mv /etc/nova/nova.conf /etc/nova/nova.conf.bk
 cat > /etc/nova/nova.conf <<eof
