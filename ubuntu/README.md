@@ -1,21 +1,5 @@
-#Cài đặt trên CentOS 6
-Bước 1:
-yum install git -y
-
-Bước 2:
-git clone https://github.com/NamNT2002/apache-tomcat7
-
-Bước 3:
-
-cd apache-tomcat7 && sh install.sh
-
-# Cài đặt trên Ubuntu Server
-Bước 1:
-apt-get install git -y
-
-Bước 2:
-git clone https://github.com/NamNT2002/apache-tomcat7
-
-Bước 3:
-
-cd apache-tomcat7 && sh install_ubuntu.sh
+#Mô Hình
+Mô hình kết nối như sau:
+1. Cần có 1 card manager kết nối giữa 3 con.
+2. Cần 1 card để cài đặt các gói tin.
+3. Cần 1 card để kết nối giữa computer node với network node
