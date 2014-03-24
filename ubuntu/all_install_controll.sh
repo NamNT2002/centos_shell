@@ -86,6 +86,8 @@ sleep 3
 #echo "HOST_IP=`ifconfig eth1 | grep inet | awk '{print $2}' | sed 's/addr://'`" >> /root/config_openstack
 #echo "EXT_HOST_IP=`ifconfig eth0 | grep inet | awk '{print $2}' | sed 's/addr://'`" >> /root/config_openstack
 #chmod +x /root/config_openstack
+export SERVICE_TOKEN="ADMIN"
+export SERVICE_ENDPOINT="http://$HOST_IP:35357/v2.0"
 rm -rf configure_openstack
 echo "HOST_IP=$HOST_IP" >> configure_openstack
 echo "EXT_HOST_IP=$EXT_HOST_IP" >> configure_openstack
@@ -745,9 +747,11 @@ eof
 mv /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini.bk
 cat > /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini << eof
 [ovs]
-tenant_network_type = gre
-tunnel_id_ranges = 1:1000
-enable_tunneling = True
+#tenant_network_type = gre
+#tunnel_id_ranges = 1:1000
+#enable_tunneling = True
+network_vlan_ranges = physnet1
+bridge_mappings = physnet1:br-int
 [agent]
 [securitygroup]
 firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver

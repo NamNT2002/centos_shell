@@ -18,6 +18,61 @@ echo "Default Gateway: $DF_GATEWAY"
 echo
 echo
 echo "Add app openstack and basic configure"
+cat allip.txt
+rm -rf allip.txt
+
+	#configure  internal network
+	inter="eth0"
+	#echo "Ten Cong Internal:"
+	read -p "Ten Cong Internal:" inter
+	if [ "$inter" = "" ]; then
+		inter="eth0"
+	fi
+	read -p "IP Address Internal:" CM_HOST_IP
+	if [ "$CM_HOST_IP" = "" ]; then
+		echo "IP Address Sai Cu Phap"
+	fi
+	read -p "Subnet Internal:" SUB_HOST
+	if [ "$SUB_HOST" = "" ]; then
+		echo "Subnet Mask Sai Cu Phap"
+	fi
+	echo ""
+	echo ""
+	#configure inter tunnel connect to computer node
+	read -p "Ten Cong Tunner:" int
+	if [ "$int" = "" ]; then
+		int="eth2"
+	fi
+	read -p "IP Address Tunner:" NK_INT_IP
+	if [ "$NK_INT_IP" = "" ]; then
+		echo "IP Address Sai Cu Phap"
+	fi
+	read -p "Subnet Tunner:" SUB_INT
+	if [ "$SUB_INT" = "" ]; then
+		echo "Subnet Mask Sai Cu Phap"
+	fi
+	
+	#configure exten network
+	echo ""
+	echo ""
+	exten="eth1"
+	#echo "Ten Cong External:"
+	read -p "Ten Cong External:" exten
+	if [ "$exten" = "" ]; then
+		exten="eth1"
+	fi
+	read -p "IP Address External:" CM_EXT_CM_HOST_IP
+	if [ "$CM_EXT_CM_HOST_IP" = "" ]; then
+		echo "IP Address Sai Cu Phap"
+	fi
+	read -p "Subnet Mask External:" SUB_EXT
+	if [ "$SUB_EXT" = "" ]; then
+		echo "Subnet Mask Sai Cu Phap"
+	fi
+	read -p "Default Gateway External:" DF_GATEWAY
+	if [ "$DF_GATEWAY" = "" ]; then
+		echo "Default Gateway Sai Cu Phap"
+	fi
 apt-get -y update
 #install python mysql client
 apt-get install python-mysqldb -y
@@ -44,45 +99,11 @@ sysctl -p
 /etc/init.d/networking restart
 #install packet
 apt-get -y install neutron-server neutron-dhcp-agent neutron-plugin-openvswitch-agent neutron-l3-agent openvswitch-controller openvswitch-switch openvswitch-datapath-dkms
-cat allip.txt
-rm -rf allip.txt
-	inter="eth0"
-	#echo "Ten Cong Internal:"
-	read -p "Ten Cong Internal:" inter
-	if [ "$inter" = "" ]; then
-		inter="eth0"
-	fi
-	read -p "IP Address Internal:" CM_HOST_IP
-	if [ "$CM_HOST_IP" = "" ]; then
-		echo "IP Address Sai Cu Phap"
-	fi
-	read -p "Subnet Internal:" SUB_HOST
-	if [ "$SUB_HOST" = "" ]; then
-		echo "Subnet Mask Sai Cu Phap"
-	fi
-	echo ""
-	echo ""
-	exten="eth1"
-	#echo "Ten Cong External:"
-	read -p "Ten Cong External:" exten
-	if [ "$exten" = "" ]; then
-		exten="eth1"
-	fi
-	read -p "IP Address External:" CM_EXT_CM_HOST_IP
-	if [ "$CM_EXT_CM_HOST_IP" = "" ]; then
-		echo "IP Address Sai Cu Phap"
-	fi
-	read -p "Subnet Mask External:" SUB_EXT
-	if [ "$SUB_EXT" = "" ]; then
-		echo "Subnet Mask Sai Cu Phap"
-	fi
-	read -p "Default Gateway External:" DF_GATEWAY
-	if [ "$DF_GATEWAY" = "" ]; then
-		echo "Default Gateway Sai Cu Phap"
-	fi
+
 	ovs-vsctl add-br br-int
-ovs-vsctl add-br br-ex
-ovs-vsctl add-port br-ex $exten
+	ovs-vsctl add-br br-ex
+	ovs-vsctl add-port br-ex $exten
+	ovs-vsctl add-port br-int $int
 clear
 #echo "Default Gateway: Interface " $idf " Ip Address:" $DF_GATEWAY
 #echo "subnet: " $SUB_HOST
@@ -93,11 +114,19 @@ cat > $InterfaceFile <<EOF
 auto lo
 iface lo inet loopback
 # Not Internet connected (OpenStack management network)
+#configure network inte
 auto $inter
 iface $inter inet static
    address $CM_HOST_IP
    netmask $SUB_HOST
 #
+#configure network tunnel connect computer node
+auto $int
+iface $int inet static
+   address $NK_INT_IP
+   netmask $SUB_INT
+#
+#configure network exten
 auto $exten
 iface $exten inet manual
 up ifconfig \$IFACE 0.0.0.0 up
@@ -134,13 +163,30 @@ chmod +x configure_openstack
 #script configure neutron on controller
 . ./configure_openstack
 apt-get -y install neutron-server neutron-plugin-openvswitch
-METADATA_PASS=`openssl rand -hex 16`
-echo "METADATA_PASS=$METADATA_PASS" >> source_openstack
+#METADATA_PASS=`openssl rand -hex 16`
+#echo "METADATA_PASS=$METADATA_PASS" >> source_openstack
 
 #configure /etc/nova/nova.conf
 #[DEFAULT]
 #neutron_metadata_proxy_shared_secret = $METADATA_PASS
 #service_neutron_metadata_proxy = true
+
+#configure /etc/neutron/dhcp_agent.ini
+mv /etc/neutron/dhcp_agent.ini /etc/neutron/dhcp_agent.ini.bk
+cat > /etc/neutron/dhcp_agent.ini << eof
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+use_namespaces = True
+dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+eof
+
+#configure /etc/neutron/l3_agent.ini
+mv /etc/neutron/l3_agent.ini > /etc/neutron/l3_agent.inibk
+cat > /etc/neutron/l3_agent.ini << eof
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+use_namespaces = True
+eof
 
 #configure /etc/neutron/neutron.conf
 mv /etc/neutron/neutron.conf /etc/neutron/neutron.conf.bk
@@ -151,6 +197,7 @@ state_path = /var/lib/neutron
 lock_path = $state_path/lock
 core_plugin = neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
 notification_driver = neutron.openstack.common.notifier.rpc_notifier
+control_exchange = neutron
 auth_strategy = keystone
 rpc_backend = neutron.openstack.common.rpc.impl_kombu
 rabbit_host = $HOST_IP
@@ -204,9 +251,11 @@ eof
 mv /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini.bk
 cat > /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini << eof
 [ovs]
-tenant_network_type = gre
-tunnel_id_ranges = 1:1000
-enable_tunneling = True
+#tenant_network_type = gre
+#tunnel_id_ranges = 1:1000
+#enable_tunneling = True
+network_vlan_ranges = physnet1
+bridge_mappings = physnet1:br-int
 [agent]
 [securitygroup]
 firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
@@ -225,6 +274,23 @@ service nova-api restart
 #linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
 #irewall_driver=nova.virt.firewall.NoopFirewallDriver
 #ecurity_group_api=neutron
-echo "Restart Nova"
+ip addr flush $int
+ip addr add $NK_INT_IP/24 dev br-int
+
+cat > ~/restart_network.sh << eof
+#!/bin/bash
+#Scrip restart neutron network on boot
+cd /etc/init.d/; for i in \$( ls neutron-* ); do service \$i restart; cd; done
+ip addr flush $int
+ip addr add $NK_INT_IP/24 dev br-int
+eof
+
+chmod +x ~/restart_network.sh
+cat > /var/spool/cron/crontabs/root << eof
+@reboot sh ~/restart_network.sh
+eof
+
+chmod 600 /var/spool/cron/crontabs/root
+echo "Restart neutron"
 cd /etc/init.d/; for i in $( ls neutron-* ); do service $i restart; cd; done
 echo "Success Full"

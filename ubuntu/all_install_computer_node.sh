@@ -37,6 +37,21 @@ rm -rf allip.txt
 	fi
 	echo ""
 	echo ""
+	#configure inter tunnel connect to computer node
+	read -p "Ten Cong Tunner:" int
+	if [ "$int" = "" ]; then
+		int="eth2"
+	fi
+	read -p "IP Address Tunner:" NK_INT_IP
+	if [ "$NK_INT_IP" = "" ]; then
+		echo "IP Address Sai Cu Phap"
+	fi
+	read -p "Subnet Tunner:" SUB_INT
+	if [ "$SUB_INT" = "" ]; then
+		echo "Subnet Mask Sai Cu Phap"
+	fi
+	echo ""
+	echo ""
 	exten="eth1"
 	#echo "Ten Cong External:"
 	read -p "Ten Cong External:" exten
@@ -69,6 +84,13 @@ iface $inter inet static
    address $CM_HOST_IP
    netmask $SUB_HOST
 #
+#configre network connect to network controll
+#configure network tunnel connect computer node
+auto $int
+iface $int inet static
+   address $NK_INT_IP
+   netmask $SUB_INT
+#configure network exten
 auto $exten
 iface $exten inet static
    address $CM_EXT_CM_HOST_IP
@@ -269,6 +291,7 @@ sysctl -p
 apt-get -y install neutron-plugin-openvswitch-agent openvswitch-datapath-dkms
 /etc/init.d/openvswitch-switch restart
 ovs-vsctl add-br br-int
+ovs-vsctl add-port br-int $int
 
 #configure /etc/neutron/neutron.conf
 mv /etc/neutron/neutron.conf /etc/neutron/neutron.conf.bk
@@ -331,17 +354,36 @@ eof
 mv /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini.bk
 cat > /etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini << eof
 [ovs]
-tenant_network_type = gre
-tunnel_id_ranges = 1:1000
-enable_tunneling = True
-integration_bridge = br-int
-tunnel_bridge = $inter
-local_ip = $CM_HOST_IP
+#tenant_network_type = gre
+#tunnel_id_ranges = 1:1000
+#enable_tunneling = True
+#integration_bridge = br-int
+#tunnel_bridge = $inter
+#local_ip = $CM_HOST_IP
+network_vlan_ranges = physnet1
+bridge_mappings = physnet1:br-int
 [agent]
 [securitygroup]
 firewall_driver=neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
 eof
 
+ip addr flush $int
+ip addr add $NK_INT_IP/24 dev br-int
+
+cat > ~/restart_network.sh << eof
+#!/bin/bash
+#Scrip restart neutron network on boot
+cd /etc/init.d/; for i in \$( ls neutron-* ); do service \$i restart; cd; done
+ip addr flush $int
+ip addr add $NK_INT_IP/24 dev br-int
+eof
+
+chmod +x ~/restart_network.sh
+cat > /var/spool/cron/crontabs/root << eof
+@reboot sh ~/restart_network.sh
+eof
+
+chmod 600 /var/spool/cron/crontabs/root
 #configure nova.conf
 #network_api_class=nova.network.neutronv2.api.API
 #neutron_url=http://controller:9696
