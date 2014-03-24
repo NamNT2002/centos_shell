@@ -226,5 +226,5 @@ service nova-api restart
 #irewall_driver=nova.virt.firewall.NoopFirewallDriver
 #ecurity_group_api=neutron
 echo "Restart Nova"
-cd /etc/init.d/; for i in $( ls nova-* ); do service $i restart; cd; done
+cd /etc/init.d/; for i in $( ls neutron-* ); do service $i restart; cd; done
 echo "Success Full"

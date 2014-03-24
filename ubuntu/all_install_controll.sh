@@ -89,6 +89,30 @@ sleep 3
 rm -rf configure_openstack
 echo "HOST_IP=$HOST_IP" >> configure_openstack
 echo "EXT_HOST_IP=$EXT_HOST_IP" >> configure_openstack
+dbpass=`openssl rand -hex 16`
+dbp_keystone=`openssl rand -hex 16`
+dbp_glance=`openssl rand -hex 16`
+dbp_neutron=`openssl rand -hex 16`
+dbp_nova=`openssl rand -hex 16`
+dbp_cinder=`openssl rand -hex 16`
+dbp_heat=`openssl rand -hex 16`
+ADMIN_PASSWORD=`openssl rand -hex 16`
+SERVICE_PASSWORD=`openssl rand -hex 16`
+RABBIT_PASS=`openssl rand -hex 16`
+METADATA_PASS=`openssl rand -hex 16`
+echo RABBIT_PASS=$RABBIT_PASS >> configure_openstack
+echo METADATA_PASS=$METADATA_PASS >> configure_openstack
+echo ADMIN_PASSWORD=$ADMIN_PASSWORD >> configure_openstack
+echo SERVICE_PASSWORD=$SERVICE_PASSWORD >> configure_openstack
+echo SERVICE_TOKEN=$SERVICE_TOKEN >> configure_openstack
+echo SERVICE_ENDPOINT=$SERVICE_ENDPOINT >> configure_openstack
+echo dbpass=$dbpass >> configure_openstack
+echo dbp_keystone=$dbp_keystone >> configure_openstack
+echo dbp_glance=$dbp_glance >> configure_openstack
+echo dbp_neutron=$dbp_neutron >> configure_openstack
+echo dbp_nova=$dbp_nova >> configure_openstack
+echo dbp_cinder=$dbp_cinder >> configure_openstack
+echo dbp_heat=$dbp_heat >> configure_openstack
 chmod +x configure_openstack
 
 
@@ -114,13 +138,7 @@ apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
 #echo "export dbp_nova=`openssl rand -hex 32`" >> configure_openstack
 #echo "export dbp_cinder=`openssl rand -hex 32`" >> configure_openstack
 #echo "export dbp_heat=`openssl rand -hex 32`" >> configure_openstack
-dbpass=`openssl rand -hex 16`
-dbp_keystone=`openssl rand -hex 16`
-dbp_glance=`openssl rand -hex 16`
-dbp_neutron=`openssl rand -hex 16`
-dbp_nova=`openssl rand -hex 16`
-dbp_cinder=`openssl rand -hex 16`
-dbp_heat=`openssl rand -hex 16`
+
 #echo $dbpass
 echo "mysql-server mysql-server/root_password password $dbpass" | debconf-set-selections
 echo "mysql-server mysql-server/root_password_again password $dbpass" | debconf-set-selections
@@ -170,13 +188,7 @@ echo "Chuan bi khoi dong lai MySQL"
 sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
 sysctl net.ipv4.ip_forward=1
 sysctl -p
-echo dbpass=$dbpass >> configure_openstack
-echo dbp_keystone=$dbp_keystone >> configure_openstack
-echo dbp_glance=$dbp_glance >> configure_openstack
-echo dbp_neutron=$dbp_neutron >> configure_openstack
-echo dbp_nova=$dbp_nova >> configure_openstack
-echo dbp_cinder=$dbp_cinder >> configure_openstack
-echo dbp_heat=$dbp_heat >> configure_openstack
+
 echo "Mat Khau User Root: $dbpass" >> Openstack_password
 echo "Mat Khau User keystone: $dbp_keystone" >> Openstack_password
 echo "Mat Khau User glance: $dbp_glance" >> Openstack_password
@@ -197,8 +209,7 @@ echo "Cai Dat MySQL Success"
 #!/bin/bash
 #Install Keystone
 
-ADMIN_PASSWORD=`openssl rand -hex 16`
-SERVICE_PASSWORD=`openssl rand -hex 16`
+
 export SERVICE_TOKEN="ADMIN"
 export SERVICE_ENDPOINT="http://$HOST_IP:35357/v2.0"
 echo "export SERVICE_TOKEN=ADMIN" >> source_openstack
@@ -216,14 +227,7 @@ apt-get -y update && apt-get -y dist-upgrade
 clear
 echo "Install Rabit messaging"
 sleep 2
-RABBIT_PASS=`openssl rand -hex 16`
-METADATA_PASS=`openssl rand -hex 16`
-echo RABBIT_PASS=$RABBIT_PASS >> configure_openstack
-echo METADATA_PASS=$METADATA_PASS >> configure_openstack
-echo ADMIN_PASSWORD=$ADMIN_PASSWORD >> configure_openstack
-echo SERVICE_PASSWORD=$SERVICE_PASSWORD >> configure_openstack
-echo SERVICE_TOKEN=$SERVICE_TOKEN >> configure_openstack
-echo SERVICE_ENDPOINT=$SERVICE_ENDPOINT >> configure_openstack
+
 apt-get -y install rabbitmq-server
 rabbitmqctl change_password guest $RABBIT_PASS
 clear
@@ -764,3 +768,12 @@ service nova-api restart
 #ecurity_group_api=neutron
 echo "Restart Nova"
 cd /etc/init.d/; for i in $( ls nova-* ); do service $i restart; cd; done
+
+apt-get install memcached libapache2-mod-wsgi openstack-dashboard -y
+apt-get remove --purge openstack-dashboard-ubuntu-theme -y
+sleep 5
+cd /etc/init.d/; for i in $( ls neutron-* ); do service $i restart; cd; done
+echo "Install Success Full"
+echo "De truy cap vao trang web quan tri ban ban co the vaot heo duong link sau:"
+echo "Web manager: http://$HOST_IP/horizon"
+echo "Username: admin 	password: $ADMIN_PASSWORD"
