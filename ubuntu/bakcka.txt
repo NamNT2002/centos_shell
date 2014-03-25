@@ -1,0 +1,5 @@
+keystone tenant-list
+keystone user-list
+neutron net-create --tenant-id $TENANT_ID sharednet1 --shared --provider:network_type flat \
+--provider:physical_network physnet1
+neutron subnet-create --tenant-id $TENANT_ID sharednet1 30.0.0.0/24
