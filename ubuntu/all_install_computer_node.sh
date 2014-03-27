@@ -178,6 +178,8 @@ vncserver_proxyclient_address=$CM_HOST_IP
 novncproxy_base_url=http://$HOST_IP:6080/vnc_auto.html
 glance_host=$HOST_IP
 
+resume_guests_state_on_host_boot=True
+
 network_api_class=nova.network.neutronv2.api.API
 neutron_url=http://$HOST_IP:9696
 neutron_auth_strategy=keystone

@@ -1,0 +1,2 @@
+sed -e "s/^#*connection *=*.*/connection = mysql:\/\/openstack:$MYSQL_PASS@$CONTROLLER_INTERNAL_ADDRESS\/keystone/"
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
