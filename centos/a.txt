@@ -1,0 +1,18 @@
+if [ "$silent_install" -ne 1 ] ; then 
+	echo -e "\n$(gettext "You will now read Centreon Licence.\\n\\tPress enter to continue.")"
+	read 
+	tput clear 
+	more "$BASE_DIR/LICENSE"
+
+	yes_no_default "$(gettext "Do you accept GPL license ?")" 
+	if [ "$?" -ne 0 ] ; then 
+		echo_info "$(gettext "You do not agree to GPL license ? Okay... have a nice day.")"
+		exit 1
+	else
+		log "INFO" "$(gettext "You accepted GPL license")"
+	fi
+else 
+	if [ "$upgrade" -eq 0 ] ; then
+		. $user_install_vars
+	fi
+fi

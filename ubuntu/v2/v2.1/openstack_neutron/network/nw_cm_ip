@@ -1,0 +1,12 @@
+#cd ..
+dir=`pwd`
+read -p"IP Address: " nw_cm_ip
+echo ""
+sed -i '/export nw_cm_ip=/ d' $dir/configure_openstack
+if [ "$nw_cm_ip" = "" ]; then
+	echo "IP Address not none"
+	sh $dir/network/nw_cm_ip
+	exit $1
+fi
+	echo "export nw_cm_ip=$nw_cm_ip" >> $dir/configure_openstack
+exit $1

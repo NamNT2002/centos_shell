@@ -1,0 +1,12 @@
+#cd ..
+dir=`pwd`
+read -p"Subnet mask: " nw_int_sub
+echo ""
+sed -i '/export nw_int_sub=/ d' $dir/configure_openstack
+if [ "$nw_int_sub" = "" ]; then
+	echo "Subnet mask not none"
+	sh $dir/network/nw_int_sub
+	exit $1
+fi
+	echo "export nw_int_sub=$nw_int_sub" >> $dir/configure_openstack
+exit $1

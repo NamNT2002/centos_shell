@@ -1,0 +1,4 @@
+ZONEINFO=Asia/Ho_Chi_Minh
+rm -f /etc/localtime
+ln -s /usr/share/zoneinfo/$ZONEINFO /etc/localtime
+ntpdate pool.ntp.org

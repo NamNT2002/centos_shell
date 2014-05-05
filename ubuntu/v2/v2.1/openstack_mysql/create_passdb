@@ -1,0 +1,11 @@
+dir=`pwd`
+read -p"Password controll Database Mysql:" -s dbpass
+echo ""
+sed -i '/export dbpass=/ d' $dir/openstack_configure
+if [ "$dbpass" = "" ]; then
+	echo "Password not none"
+	sh $dir/create_passdb
+	exit $1
+fi
+	echo "export dbpass=$dbpass" >> $dir/openstack_configure
+exit $1

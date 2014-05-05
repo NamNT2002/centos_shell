@@ -1,0 +1,12 @@
+cd ..
+dir=`pwd`
+read -p"IP Address External: " EXT_HOST_IP
+echo ""
+sed -i '/export EXT_HOST_IP=/ d' $dir/openstack_configure
+if [ "$EXT_HOST_IP" = "" ]; then
+	echo "IP Address not none"
+	sh $dir/network/int_ip_external
+	exit $1
+fi
+	echo "export EXT_HOST_IP=$EXT_HOST_IP" >> $dir/openstack_configure
+exit $1

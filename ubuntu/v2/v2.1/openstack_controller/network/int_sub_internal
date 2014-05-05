@@ -1,0 +1,12 @@
+cd ..
+dir=`pwd`
+read -p"Subnet mask: " SUB_HOST
+echo ""
+sed -i '/export SUB_HOST=/ d' $dir/openstack_configure
+if [ "$SUB_HOST" = "" ]; then
+	echo "Subnet mask not none"
+	sh $dir/network/int_sub_internal
+	exit $1
+fi
+	echo "export SUB_HOST=$SUB_HOST" >> $dir/openstack_configure
+exit $1

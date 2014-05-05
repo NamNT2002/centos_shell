@@ -1,0 +1,11 @@
+dir=`pwd`
+read -p"Password Admin Openstack:" -s ADMIN_PASSWORD
+echo ""
+sed -i '/export ADMIN_PASSWORD=/ d' $dir/openstack_configure
+if [ "$ADMIN_PASSWORD" = "" ]; then
+	echo "Password not none"
+	sh $dir/create_admin
+	exit $1
+fi
+	echo "export ADMIN_PASSWORD=$ADMIN_PASSWORD" >> $dir/openstack_configure
+exit $1

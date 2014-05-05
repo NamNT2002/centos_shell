@@ -1,3 +1,19 @@
+#show database mysql
+echo "select chuoi from test" | mysql -u root -pNguyenthenam2501@ -h172.16.6.23 namnt > ~/list.txt && sed -n '1!p' ~/list.txt > list1.txt
+
+#so sanh
+-lt (<)
+
+-gt (>)
+
+-le (<=)
+
+-ge (>=)
+
+-eq (==)
+
+-ne (!=)
+
 #vong lap for
  for i in $( cat abc.txt | tr " " "\n" ); do echo "doi nay dep lam $i oi" >> testfile.txt; done
  
@@ -78,3 +94,5 @@ This
 
 #phép toán so sanh:
 nhỏ hơn: $x -lt $y
+
+awk 'FNR>=20 && FNR<=40' file

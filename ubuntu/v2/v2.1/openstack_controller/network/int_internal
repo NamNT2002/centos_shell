@@ -1,0 +1,12 @@
+cd ..
+dir=`pwd`
+read -p"Interface Internal: " inter
+echo ""
+sed -i '/export inter=/ d' $dir/openstack_configure
+if [ "$inter" = "" ]; then
+	echo "Interface not none"
+	sh $dir/network/int_internal
+	exit $1
+fi
+	echo "export inter=$inter" >> $dir/openstack_configure
+exit $1

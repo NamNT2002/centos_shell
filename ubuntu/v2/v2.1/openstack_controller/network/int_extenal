@@ -1,0 +1,12 @@
+cd ..
+dir=`pwd`
+read -p"External External: " exten
+echo ""
+sed -i '/export exten=/ d' $dir/openstack_configure
+if [ "$exten" = "" ]; then
+	echo "External not none"
+	sh $dir/network/int_extenal
+	exit $1
+fi
+	echo "export exten=$exten" >> $dir/openstack_configure
+exit $1

@@ -1,0 +1,12 @@
+#cd ..
+dir=`pwd`
+read -p"Interface Connected Computer Node: " nw_cm_int
+echo ""
+sed -i '/export nw_cm_int=/ d' $dir/configure_openstack
+if [ "$nw_cm_int" = "" ]; then
+	echo "nw_cm_intface not none"
+	sh $dir/network/nw_cm_int
+	exit $1
+fi
+	echo "export nw_cm_int=$nw_cm_int" >> $dir/configure_openstack
+exit $1

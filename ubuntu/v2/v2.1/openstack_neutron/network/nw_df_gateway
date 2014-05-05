@@ -1,0 +1,12 @@
+#cd ..
+dir=`pwd`
+read -p"Default Gateway: " nw_df_gateway
+echo ""
+sed -i '/export nw_df_gateway=/ d' $dir/configure_openstack
+if [ "$nw_df_gateway" = "" ]; then
+	echo "Default gateway not none"
+	sh $dir/network/nw_df_gateway
+	exit $1
+fi
+	echo "export nw_df_gateway=$nw_df_gateway" >> $dir/configure_openstack
+exit $1
